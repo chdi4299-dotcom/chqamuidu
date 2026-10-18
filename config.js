@@ -1,7 +1,7 @@
-// Public configuration only. Never store secrets here.
+// Public fallback contacts provided by the owner. No secrets belong here.
+// When /api/catalog is available, database contact settings take precedence.
 window.VEZLIO_CONFIG = {
-  whatsappNumber: "", // E.164 digits only, e.g. 947XXXXXXXX (without +)
-  telegramUrl: "",     // e.g. https://t.me/your_channel
-  supportEmail: "",
-  // Products are informational enquiries. No payment, order, account or AI integration is enabled.
+  whatsappNumber: "94788245211",
+  telegramUrl: "https://t.me/VEZLIO",
+  supportEmail: ""
 };

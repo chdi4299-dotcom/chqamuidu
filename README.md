@@ -1,61 +1,49 @@
-# VEZLIO — Digital Tools & Social Promotion Storefront
+# VEZLIO — storefront and owner workspace
 
-A dependency-free, responsive **light-mode storefront foundation** for the planned `vezlio.store` domain.
+The existing `index.html`, `styles.css`, `app.js` and `config.js` storefront is preserved. A Node.js Netlify Function adds a private `/admin` workspace backed by **Supabase Auth, mandatory TOTP MFA, PostgreSQL and RLS**. No React rebuild or unrelated project changes.
 
-## What is implemented
-- Accessible, responsive landing page and mobile navigation
-- Product discovery catalog for YouTube Premium, Spotify, CapCut, InShot, Google AI Pro and other tool categories
-- Real-time client-side search and category filters
-- Product enquiry messages that can be copied to clipboard
-- Platform-aware SMM **enquiry** form (no ordering, no fabricated engagement automation)
-- Interactive FAQ-based support widget (not a live AI bot)
-- Configurable WhatsApp/Telegram support buttons
-- Clearly marked preliminary privacy, terms and refund drafts
-- Basic metadata and branded SVG favicon
-- No framework/dependency installation needed
+## Included
 
-## Start locally
+- Existing light-mode homepage, tool categories, search, filters, promotion enquiries, FAQ assistant and legal drafts.
+- Owner management of real products, subscription packages/prices, legitimate service listings and public contact settings.
+- One designated Auth user UUID, checked in the server environment **and** a protected database configuration table. Both must match; no owner is seeded.
+- Verified JWT + network-backed user check + `aal2` + enrolled TOTP for every protected page/API operation; RLS independently enforces owner UUID and `aal2` for every database operation.
+- HttpOnly, Secure, SameSite cookies, CSRF/origin checks, strict input allowlists, optimistic edit conflict detection, no browser tokens or role selectors.
+- A public allowlisted RPC for reviewed, published catalogue fields. Drafts, internal notes and the owner UUID are excluded.
+- No service-role key in application runtime. All catalogue CRUD uses the current user's JWT and the publishable key, preserving RLS.
 
-Open `index.html` directly, or serve the directory with:
+**Not enabled:** customer accounts, order storage, checkout, payments, paid orders, fulfillment, automated message sending or a live AI bot. WhatsApp buttons open an enquiry draft only. The catalogue database starts empty; unknown prices/durations/support display “Contact for details”. Contacts supplied by the owner are configured without inventing destinations.
+
+## Run locally
+
+Requires Node.js 22.12+ and npm. Do not place secrets in browser files.
 
 ```sh
-python3 -m http.server 8000
+npm ci
+npm run check
+npm test
+npm run build
+npm run dev
 ```
 
-Navigate to `http://localhost:8000`.
+Open `http://localhost:8888`. Without Supabase configuration, the informational storefront works and `/admin` stays locked with a setup-required screen. `npm run build` only creates a local allowlisted `dist/`; it does not deploy.
 
-## Configure support
+For real owner access, copy `.env.example` to `.env`, configure a dedicated Supabase project and real owner UUID, then follow **[docs/SETUP.md](docs/SETUP.md)**. That guide covers the migration, exact environment variables, MFA enrollment, Netlify GitHub configuration, validation and the planned `vezlio.store` custom domain.
 
-Edit the public values in `config.js`:
+## Validation
 
-```js
-window.VEZLIO_CONFIG = {
-  whatsappNumber: "947XXXXXXXX",
-  telegramUrl: "https://t.me/your_verified_channel",
-  supportEmail: ""
-};
+```sh
+npm test                 # API, signed JWT, input, packaging and actual PostgreSQL RLS tests
+npm run test:rls         # PostgreSQL RLS in isolation, using PGlite
+npx playwright install chromium
+npm run test:browser     # Browser interactions with isolated test-only Auth/data fixtures
+npm run test:live        # Skips until a disposable real Supabase project is explicitly configured
 ```
 
-**No credentials, access tokens or API secrets belong in `config.js`.**
+See **[docs/SECURITY.md](docs/SECURITY.md)** for the trust boundary, access matrix and recovery procedure, and **[docs/VALIDATION.md](docs/VALIDATION.md)** for results and the distinction between local tests and live-provider verification.
 
-When a verified contact is not configured, the floating button displays a clear message instead of opening a made-up contact.
+## Publication is locked
 
-## Deployment
+No public deployment, domain/DNS changes or remote migration is performed by this project setup. Netlify production builds fail unless `VEZLIO_ALLOW_NETLIFY_DEPLOY=approved` is deliberately set **after explicit owner approval**. Branch and PR deploy previews remain blocked. CI validates code only and has no hosting/database credentials.
 
-For a simple frontend preview, deploy the directory as static files (for example, GitHub Pages or another static host). Set DNS for `vezlio.store` only after domain ownership and hosting configuration are confirmed.
-
-## Important limitations and remaining work
-
-**This is not a production commerce system.** It does not yet have authentication, a database, administrative controls, transactions, payments, purchases, order tracking, email delivery, paid provider integrations or an LLM-powered chatbot. Catalog entries are informational enquiries; they are not promises of authorization, availability or prices. All UI descriptions state these boundaries.
-
-Before accepting real payments, implement a secure backend with:
-1. Auth + role-checked admin access, isolated customer records and row-level security.
-2. Admin-controlled product and service catalog with documented sourcing/authorization.
-3. Real checkout/payment provider with webhook signature verification and transactional order state.
-4. Order history, audited refunds and secure fulfillment.
-5. Admin-managed verified contacts and real support tickets.
-6. Privacy/security/legal review, testing, monitoring and operational deployment.
-
-Only list/resell third-party subscriptions where terms and authorization allow it. Social media promotion must comply with applicable platform policies and avoid manipulated engagement or spam.
-
-No fake statistics, mock orders or paid transactions are presented as real.
+`main` should be reviewed and merged only when deployment behavior is understood. Do not publish the repository root: `dist/` contains public assets only; the protected dashboard HTML is generated by the function after authorization.
