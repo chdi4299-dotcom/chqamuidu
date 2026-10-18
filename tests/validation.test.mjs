@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateRecord,version } from '../server/validation.mjs';
+import { ID,product } from './helpers.mjs';
+const plan={product_id:ID,name:'TEST plan',duration:null,price_lkr:null,availability:'contact',support_terms:null,published:false};
+test('missing price, duration and support stay null, never invented',()=>{const out=validateRecord('packages',plan);assert.equal(out.price_lkr,null);assert.equal(out.duration,null);assert.equal(out.support_terms,null);});
+for(const value of [-1,NaN,Infinity,'1e3','1.001','100000000','free',{},true])test(`invalid price ${String(value)} is rejected`,()=>assert.throws(()=>validateRecord('packages',{...plan,price_lkr:value}),e=>e.status===400));
+test('confirmed decimal price is accepted exactly to two places',()=>assert.equal(validateRecord('packages',{...plan,price_lkr:'1250.50'}).price_lkr,1250.5));
+test('input is treated as text, with strict fields and honest publication rule',()=>{assert.equal(validateRecord('products',{...product,name:'<img src=x onerror=alert(1)>'}).name,'<img src=x onerror=alert(1)>');assert.throws(()=>validateRecord('products',{...product,published:true,legitimacy_confirmed:false}));assert.throws(()=>validateRecord('products',{...product,role:'admin'}));});
+test('contacts accept only public destinations, or null to disable',()=>{assert.deepEqual(validateRecord('contacts',{whatsapp_number:'',telegram_url:'',support_email:'',support_note:''}),{whatsapp_number:null,telegram_url:null,support_email:null,support_note:null});for(const url of ['javascript:alert(1)','https://t.me@attacker.test/VEZLIO','https://attacker.test','https://t.me/VEZLIO?x=1'])assert.throws(()=>validateRecord('contacts',{whatsapp_number:null,telegram_url:url,support_email:null,support_note:null}));});
+test('database timestamp is required for optimistic concurrency',()=>{assert.equal(version('2026-10-17T10:11:12.123456+00:00'),'2026-10-17T10:11:12.123456+00:00');assert.throws(()=>version('now()'));});
