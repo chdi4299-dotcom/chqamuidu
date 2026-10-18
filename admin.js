@@ -159,7 +159,7 @@
     window.addEventListener('hashchange',showTab);
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)session().then(s=>{if(s.state!=='authenticated')location.replace('/admin/login');}).catch(()=>{location.replace('/admin/login');});});
   }
-  function showTab() {const tab=['overview','products','services','contacts'].includes(location.hash.slice(1))?location.hash.slice(1):'overview';$$('[data-panel]').forEach(x=>{x.hidden=x.dataset.panel!==tab;});$$('[data-tab]').forEach(x=>{x.classList.toggle('active',x.dataset.tab===tab);if(x.dataset.tab===tab)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});$('#sectionTitle').textContent={overview:'Overview',products:'Products & plans',services:'Promotion services',contacts:'Contact settings'}[tab];}
+  function showTab() {const tab=['overview','products','services','contacts'].includes(location.hash.slice(1))?location.hash.slice(1):'overview';$$('[data-panel]').forEach(x=>{x.hidden=x.dataset.panel!==tab;});$$('[data-tab]').forEach(x=>{x.classList.toggle('active',x.dataset.tab===tab);if(x.dataset.tab===tab)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current');});$('#sectionTitle').textContent={overview:'Overview',products:'Products & plans',services:'Social Media Boosting',contacts:'Contact settings'}[tab];}
   window.addEventListener('pageshow',event=>{if(event.persisted&&['dashboard','mfa'].includes(page))location.reload();});
   boot().catch(error=>notify(error.message,true));
 })();
