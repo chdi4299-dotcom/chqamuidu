@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>VEZLIO — Provider integration admin</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/public/boosting.css" />
+  <script src="/public/pricing.js" defer></script>
+  <script src="/admin/boosting.js" defer></script>
+</head>
+<body>
+  <main class="integration-admin">
+    <header><div><a href="/" class="brand">vezlio.</a><h1>Provider integration</h1><p>Owner access · MFT Boost Agent catalogue</p></div><a class="btn btn-outline" href="/">View storefront ↗</a></header>
+    <section class="admin-panel" id="ownerLogin">
+      <h2>Owner authorization</h2>
+      <p>Use the separate owner token configured in the server secret <code>VEZLIO_ADMIN_TOKEN</code>. Provider API keys belong only in the host's server secret settings.</p>
+      <form id="ownerForm"><div class="field"><label for="ownerToken">Owner token</label><input id="ownerToken" type="password" autocomplete="off" required minlength="32" maxlength="1024" /></div><button class="btn btn-primary" type="submit">Open integration admin</button></form>
+    </section>
+    <p id="adminStatus" class="admin-status" role="status" aria-live="polite"></p>
+    <section id="ownerDashboard" hidden>
+      <div class="admin-actions"><button id="syncCatalogue" type="button" class="btn btn-primary">Import authenticated Agent catalogue</button><button id="refreshAdmin" type="button" class="btn btn-outline">Refresh status</button><button id="ownerLogout" type="button" class="btn btn-outline">Lock admin</button></div>
+      <div class="admin-panel"><h2>Import verification</h2><div id="adminSummary" class="admin-summary"></div><p id="adminBlocker" class="admin-warning"></p><p>The API confirms authentication and USD account currency. Its documented response has no Agent-tier claim; the owner must confirm that the configured key belongs to the Agent account. Only verified Default quantity services are shown to customers. Other source records are retained for review.</p><pre id="importReceipt">No authenticated catalogue has been retrieved.</pre></div>
+      <div class="admin-panel"><h2>Private source records</h2><p>USD costs and original provider properties are visible only through the authorized admin API. Importing never places provider orders. This page does not publish website code.</p><div class="field"><label for="adminSearch">Search service ID, name, platform or category</label><input id="adminSearch" type="search" autocomplete="off" /></div><p id="adminCount"></p><div class="admin-table-wrap"><table><thead><tr><th>ID</th><th>Service / properties</th><th>Agent USD source rate</th><th>Converted LKR rate</th><th>Min–max</th><th>Status</th></tr></thead><tbody id="adminRecords"></tbody></table></div><button type="button" id="adminMore" class="btn btn-outline" hidden>Show more records</button></div>
+    </section>
+  </main>
+</body>
+</html>

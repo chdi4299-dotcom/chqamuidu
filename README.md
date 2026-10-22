@@ -1,61 +1,54 @@
-# VEZLIO — Digital Tools & Social Promotion Storefront
+# VEZLIO — Everything Digital. One Place.
 
-A dependency-free, responsive **light-mode storefront foundation** for the planned `vezlio.store` domain.
+Existing light-mode storefront plus a server-only MFT Boost Agent catalogue integration. The original product discovery, search, category filters, navigation, campaign enquiry form, FAQ assistant, support links and policy dialogs remain available.
 
-## What is implemented
-- Accessible, responsive landing page and mobile navigation
-- Product discovery catalog for YouTube Premium, Spotify, CapCut, InShot, Google AI Pro and other tool categories
-- Real-time client-side search and category filters
-- Product enquiry messages that can be copied to clipboard
-- Platform-aware SMM **enquiry** form (no ordering, no fabricated engagement automation)
-- Interactive FAQ-based support widget (not a live AI bot)
-- Configurable WhatsApp/Telegram support buttons
-- Clearly marked preliminary privacy, terms and refund drafts
-- Basic metadata and branded SVG favicon
-- No framework/dependency installation needed
+## Run
 
-## Start locally
-
-Open `index.html` directly, or serve the directory with:
+Requires Node.js 22.9 or newer. No third-party runtime dependencies.
 
 ```sh
-python3 -m http.server 8000
+cp .env.example .env
+chmod 600 .env
+npm start
 ```
 
-Navigate to `http://localhost:8000`.
+Open `http://127.0.0.1:8000`. With no provider credentials, the marketplace honestly reports that prices are unavailable. It contains **no fallback catalogue, service IDs or prices**.
 
-## Configure support
+The integration admin is at `/admin/boosting`. Configure a separate strong `VEZLIO_ADMIN_TOKEN` server secret to unlock its private data. Never put secrets in public `config.js`, browser code, Git or chat.
 
-Edit the public values in `config.js`:
+## Import your actual Agent catalogue
 
-```js
-window.VEZLIO_CONFIG = {
-  whatsappNumber: "947XXXXXXXX",
-  telegramUrl: "https://t.me/your_verified_channel",
-  supportEmail: ""
-};
+Configure `MFTBOOST_API_KEY` as a server secret from your own authenticated Agent account. After confirming the key's account tier, set `MFTBOOST_ACCOUNT_TIER=agent`. The official API does not return an Agent-tier claim. Use either the owner integration console or:
+
+```sh
+npm run sync:mftboost
 ```
 
-**No credentials, access tokens or API secrets belong in `config.js`.**
+The importer performs read-only authenticated `balance` and `services` requests to `https://mftboost.com/api/v2`, requires USD account currency, validates source IDs and decimal rates, verifies every conversion, and atomically saves a private snapshot. Imports are manual; startup and browsing never import or create paid orders.
 
-When a verified contact is not configured, the floating button displays a clear message instead of opening a made-up contact.
+Customer pricing:
 
-## Deployment
+```text
+Rate per 1,000 = Agent USD rate × 2.5 × 333
+Quantity total = CEIL(Agent USD rate × quantity × 2.5 × 333 / 1000)
+```
 
-For a simple frontend preview, deploy the directory as static files (for example, GitHub Pages or another static host). Set DNS for `vezlio.store` only after domain ownership and hosting configuration are confirmed.
+Rates remain full-precision decimal strings. Only the final quantity total rounds up to whole LKR. Raw USD costs and complete source properties are restricted to the owner API. Public services expose converted prices, exact names, original IDs, categories, quantity limits, descriptions and supported source properties.
 
-## Important limitations and remaining work
+All validated source records are retained without duplicate IDs. `Default` services with valid quantity limits are eligible for customer quotes. Other service types remain private for review until their pricing basis and required inputs are verified. Services absent from a later snapshot become inactive while their previous records remain retained.
 
-**This is not a production commerce system.** It does not yet have authentication, a database, administrative controls, transactions, payments, purchases, order tracking, email delivery, paid provider integrations or an LLM-powered chatbot. Catalog entries are informational enquiries; they are not promises of authorization, availability or prices. All UI descriptions state these boundaries.
+## Verify
 
-Before accepting real payments, implement a secure backend with:
-1. Auth + role-checked admin access, isolated customer records and row-level security.
-2. Admin-controlled product and service catalog with documented sourcing/authorization.
-3. Real checkout/payment provider with webhook signature verification and transactional order state.
-4. Order history, audited refunds and secure fulfillment.
-5. Admin-managed verified contacts and real support tickets.
-6. Privacy/security/legal review, testing, monitoring and operational deployment.
+```sh
+npm test
+```
 
-Only list/resell third-party subscriptions where terms and authorization allow it. Social media promotion must comply with applicable platform policies and avoid manipulated engagement or spam.
+See [MFT Boost setup and operational details](docs/mftboost-integration.md) and [the verification record](docs/mftboost-verification.md).
 
-No fake statistics, mock orders or paid transactions are presented as real.
+## Hosting and scope
+
+This integration requires the Node server and a persistent private data directory; serving the repository with a generic static file server is unsuitable for live imports and may expose private files. Use the explicit static allowlist in the supplied server, HTTPS in production, and keep the private data directory on persistent storage outside a public web root.
+
+The requested repository's `main` at `58f43498ef5850dd2c8276992f03fc6d2415bd8d` contained six static files, with no existing videos, customer authentication, database or admin implementation. This change preserves that source version and adds a separate provider integration console. It does not replace an independently hosted, newer VEZLIO application.
+
+Customer accounts, checkout, payments, paid provider ordering and general product management are not implemented by this change. Existing product listings and campaign forms continue to prepare enquiries. No website deployment or publication is part of this integration branch.
